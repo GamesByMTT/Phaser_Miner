@@ -158,16 +158,12 @@ export class UiPopups extends Phaser.GameObjects.Container {
 
          // Create scrollbar container
         const popupBg = this.scene.add.image(0, 0, 'messagePopup').setDepth(13);
-        const settingText = this.scene.add.text(-100, -290, 'SETTINGS', {color: "#fbe300", fontSize: "100px", fontFamily: 'BabasKai'}).setOrigin(0.5);
-        const soundsImage = this.scene.add.image(-270, -100, 'soundImage').setDepth(10).setScale(0.7);
-        const musicImage = this.scene.add.image(-270, 100, 'musicImage').setDepth(10).setScale(0.7);
-        const volume0 = this.scene.add.text(-250, -190, "0%", {color: "#616d77", fontSize: "40px", fontFamily: 'BabasKai'});
-        const volume100 = this.scene.add.text(270, -190, "100%", {color: "#616d77", fontSize: "40px", fontFamily: 'BabasKai'});
-        const musicVolume0 = this.scene.add.text(-250, 10, "0%", {color: "#616d77", fontSize: "40px", fontFamily: 'BabasKai'});
-        const musicVolume100 = this.scene.add.text(270, 10, "100%", {color: "#616d77", fontSize: "40px", fontFamily: 'BabasKai'});
+        const settingText = this.scene.add.text(0, -240, 'SETTINGS', {color: "#fbe300", fontSize: "100px", fontFamily: 'BabasKai'}).setOrigin(0.5);
+        const soundsImage = this.scene.add.image(-300, -100, 'soundImage').setDepth(10).setScale(0.7);
+        const musicImage = this.scene.add.image(-300, 100, 'musicImage').setDepth(10).setScale(0.7);
        
-        const soundScrollbarContainer = this.scene.add.container(-200, -100);
-        const musicScrollbarContainer = this.scene.add.container(-200, 100);
+        const soundScrollbarContainer = this.scene.add.container(200, -100);
+        const musicScrollbarContainer = this.scene.add.container(200, 100);
 
             // Create scrollbar backgrounds
             const soundScrollBar = this.scene.add.image(0, 0, 'sounProgress').setOrigin(0, 0.5);
@@ -244,8 +240,8 @@ export class UiPopups extends Phaser.GameObjects.Container {
                 updateLevel(localX, musicHandle, musicScrollBar, false);
             });
 
-            soundScrollbarContainer.setPosition(-200, -100);
-            musicScrollbarContainer.setPosition(-200, 100);
+            soundScrollbarContainer.setPosition(-140, -100);
+            musicScrollbarContainer.setPosition(-140, 100);
 
         const exitButtonSprites = [
             this.scene.textures.get('exitButton'),
@@ -265,7 +261,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         popupBg.setScale(0.9);
         popupBg.setAlpha(1);
         
-        infopopupContainer.add([popupBg, settingText, this.settingClose, soundsImage, musicImage,  volume0, volume100, musicVolume0, musicVolume100,  soundScrollbarContainer,
+        infopopupContainer.add([popupBg, settingText, this.settingClose, soundsImage, musicImage, soundScrollbarContainer,
             musicScrollbarContainer]);
     }
 

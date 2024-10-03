@@ -1,7 +1,8 @@
 import Phaser, { Scene } from "phaser";
 import { Globals, initData, ResultData } from "./Globals";
 import { gameConfig } from "./appconfig";
-const TextStyle = { fontFamily: "BabasKai", fontSize: '30px', color: '#dab47b', align: "left", wordWrap: { width: 1200, useAdvancedWrap: true } };
+const TextStyle = { fontFamily: "BabasKai", fontSize: '40px', color: '#ffffff', align: "left", wordWrap: { width: 1200, useAdvancedWrap: true } };
+const headingTextStyle = { fontFamily: "BabasKai", fontSize: '60px', color: '#ffffff', align: "left", wordWrap: { width: 1200, useAdvancedWrap: true } };
 
 export default class InfoScene extends Scene{
     pageviewContainer!: Phaser.GameObjects.Container;
@@ -40,7 +41,7 @@ export default class InfoScene extends Scene{
         popupContainer.add(inputOverlay);
 
         // 3. Add a heading image to the popup container (You can adjust or remove this)
-        const headingImage = this.add.image(gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 400, 'headingImage');
+        const headingImage = this.add.image(gameConfig.scale.width / 2, gameConfig.scale.height / 2 , 'messagePopup');
         popupContainer.add(headingImage);
 
         // 4. Add a close button to the popup 
@@ -56,9 +57,9 @@ export default class InfoScene extends Scene{
         // 5. Create a mask to define the visible area for scrolling 
         const maskShape = this.make.graphics().fillRect(
             0, // Adjust X position to center 
-            gameConfig.scale.height / 2 - 300, // Adjust Y position 
+            gameConfig.scale.height / 2 - 370, // Adjust Y position 
             gameConfig.scale.width - 100, // Full width minus some padding 
-            800 // Desired height of the scrollable area 
+            750 // Desired height of the scrollable area 
         );
         const mask = maskShape.createGeometryMask();
 
@@ -95,16 +96,20 @@ export default class InfoScene extends Scene{
     }
 
     addScrollableContent() {
-        const content = this.add.image(gameConfig.scale.width / 2, 150, 'minorSymbolsHeading').setOrigin(0.5).setDepth(2);
-        const minSymbol1 = this.add.image(600, 350, "slots0_0").setDepth(2).setScale(0.8) 
-        const minSymbol2 = this.add.image(1050, 350, "slots1_0").setDepth(2).setScale(0.8) 
-        const minSymbol3 = this.add.image(600, 550, "slots2_0").setDepth(2).setScale(0.8) 
-        const minSymbol4 = this.add.image(1050, 550, "slots3_0").setDepth(2).setScale(0.8) 
+        const content = this.add.text(gameConfig.scale.width / 2, 150, "MINOR SYMMBOLS", headingTextStyle).setOrigin(0.5).setDepth(2);
+        const minSymbol1 = this.add.image(350, 350, "slots0_0").setDepth(2)
+        const minSymbol2 = this.add.image(850, 350, "slots1_0").setDepth(2)
+        const minSymbol3 = this.add.image(1350, 350, "slots2_0").setDepth(2)
+        const minSymbol4 = this.add.image(350, 550, "slots3_0").setDepth(2)
+        const minSymbol5 = this.add.image(850, 550, "slots4_0").setDepth(2)            
+        const majorSymbol1 = this.add.image(1350, 550, "slots5_0").setDepth(2)
         const infoIcons = [
-            { x: 750, y: 300 }, // Position for infoIcon2
-            { x: 1200, y: 300 }, // Position for infoIcon3
-            { x: 750, y: 500 }, //
-            { x: 1200, y: 500 }, //
+            {x: 500, y: 300},
+            { x: 1000, y: 300 }, // Position for infoIcon2
+            { x: 1500, y: 300 }, // Position for infoIcon3
+            { x: 500, y: 500 }, //
+            { x: 1000, y: 500 }, //
+            { x: 1500, y: 500 }, //
             // { x: 1200, y: 500 }, //
         ]
         const minorIcon = initData.UIData.symbols
@@ -113,7 +118,7 @@ export default class InfoScene extends Scene{
             const iconPosition = infoIcons[symbolIndex];
             if (!iconPosition) return; // Avoid undefined positions
             // Loop through each multiplier array (e.g., [100, 0], [50, 0])
-            symbol.multiplier.slice(0, 3).forEach((multiplierValueArray, multiplierIndex) => {
+            symbol.multiplier.slice(0, 5).forEach((multiplierValueArray, multiplierIndex) => {
                 // Ensure multiplierValueArray is an array before accessing elements
                 if (Array.isArray(multiplierValueArray)) {
                     const multiplierValue = multiplierValueArray[0]; // Access the first value of the array
@@ -137,28 +142,29 @@ export default class InfoScene extends Scene{
                 }
             });
         });    
-        const MajorSymBolHeading = this.add.image( gameConfig.scale.width / 2, 800, 'majorSymbolHeading' ).setOrigin(0.5).setDepth(2);  
-        const minSymbol5 = this.add.image(350, 950, "slots4_0").setDepth(2).setScale(0.8)               
-        const majorSymbol1 = this.add.image(850, 950, "slots5_0").setDepth(2).setScale(0.8) 
-        const majorSymbol2 = this.add.image(1350, 950, "slots6_0").setDepth(2).setScale(0.8) 
-        const majorSymbol3 = this.add.image(650, 1150, "slots7_0").setDepth(2).setScale(0.8) 
-        const majorSymbol4 = this.add.image(1050, 1150, "slots8_0").setDepth(2).setScale(0.8) 
+        const MajorSymBolHeading = this.add.text( gameConfig.scale.width / 2, 800, "MAJOR SYMBOLS", headingTextStyle ).setOrigin(0.5).setDepth(2);  
+        // const minSymbol5 = this.add.image(350, 950, "slots4_0").setDepth(2).setScale(0.8)               
+        // const majorSymbol1 = this.add.image(850, 950, "slots5_0").setDepth(2).setScale(0.8) 
+        const majorSymbol2 = this.add.image(350, 950, "slots6_0").setDepth(2)
+        const majorSymbol3 = this.add.image(850, 950, "slots7_0").setDepth(2)
+        const majorSymbol4 = this.add.image(1350, 950, "slots8_0").setDepth(2)
         const majorSymbol1Text = this.add.text(500, 900, '5X - 80 \n4X - 30 \n3X - 15', TextStyle) 
         const majorSymbol2Text = this.add.text(1000, 900, '5X - 80 \n4X - 30 \n3X - 15', TextStyle) 
         const majorSymbol3Text = this.add.text(1500, 900, '5X - 80 \n4X - 30 \n3X - 15', TextStyle) 
-        const majorSymbol4Text = this.add.text(800, 1100, '5X - 80 \n4X - 30 \n3X - 15', TextStyle )
-        const majorSymbol5Text = this.add.text(1200, 1100, '5X - 80 \n4X - 30 \n3X - 15', TextStyle )
-        const specialSymBolHeading = this.add.image(gameConfig.scale.width / 2, 1400, "specialSymBolHeading").setDepth(2).setOrigin(0.5)
-        const specialSymBol1 = this.add.image(200, 1600, "slots9_0").setDepth(2).setOrigin(0.5).setScale(0.8)
-        const specialSymBol2 = this.add.image(200, 1800, "slots10_0").setDepth(2).setOrigin(0.5).setScale(0.8)
-       const payLineHead = this.add.image(gameConfig.scale.width / 2, 1950, "payLinesHeading")
+
+        const specialSymBolHeading = this.add.text(gameConfig.scale.width / 2, 1200, "SPECIAL SYMBOLS", headingTextStyle).setDepth(2).setOrigin(0.5)
+        const specialSymBol1 = this.add.image(350, 1400, "slots9_0").setDepth(2).setOrigin(0.5)
+        const specialSymBol2 = this.add.image(350, 1600, "slots10_0").setDepth(2).setOrigin(0.5)
+        const specialSymBol3 = this.add.image(350, 1800, "slots11_0").setDepth(2).setOrigin(0.5)
+       const payLineHead = this.add.text(gameConfig.scale.width / 2, 1950, "PAYTABLE", headingTextStyle)
       
         const descriptionPos = [ 
-            {x: 350, y: 1550},
-            {x: 350, y: 1750},
+            {x: 450, y: 1350},
+            {x: 450, y: 1550},
+            {x: 450, y: 1750},
         ]
 
-        for (let i = 9; i <= 10; i++) {
+        for (let i = 9; i <= 11; i++) {
             const symbol = initData.UIData.symbols[i];
             if (symbol) {
                 const position = descriptionPos[i - 9];
@@ -176,22 +182,13 @@ export default class InfoScene extends Scene{
             } else {
             }
         }
-        const payLines = this.add.image( gameConfig.scale.width / 2, 2300, 'payLines' ).setOrigin(0.5).setDepth(2);
+        const payLines = this.add.image( gameConfig.scale.width / 2, 3000, 'payLines' ).setOrigin(0.5).setDepth(2);
         this.scrollContainer.add([content,minSymbol1,minSymbol2,
             minSymbol3,  minSymbol4,  minSymbol5,
             MajorSymBolHeading, majorSymbol1, majorSymbol1Text, majorSymbol2, majorSymbol2Text, 
-            majorSymbol3,majorSymbol3Text, majorSymbol4, majorSymbol4Text, majorSymbol5Text, specialSymBolHeading, specialSymBol1, specialSymBol2, payLineHead, payLines
+            majorSymbol3,majorSymbol3Text, majorSymbol4, specialSymBolHeading, specialSymBol1, specialSymBol2, specialSymBol3, payLineHead, payLines
         ]); 
        
-        // 10. Add drag event listener to the roller 
-        // this.input.setDraggable(this.roller); 
-        // this.roller.on('drag', (pointer: any, dragX: number, dragY: number) => {
-        //     const minY = this.scrollbarBg.getTopCenter().y + this.roller.height / 2 ;
-        //     const maxY = this.scrollbarBg.getBottomCenter().y - this.roller.height ;
-        //     dragY = Phaser.Math.Clamp(dragY, minY, maxY);
-        //     this.roller.y = dragY;
-        // });
-
         this.input.on('wheel', (pointer: any, gameObjects: any, deltaX: number, deltaY: number) => {
             const minY = this.scrollbarBg.getTopCenter().y + this.roller.height / 2;
             const maxY = this.scrollbarBg.getBottomCenter().y - this.roller.height / 2;
@@ -199,7 +196,6 @@ export default class InfoScene extends Scene{
             newY = Phaser.Math.Clamp(newY, minY, maxY);
             this.roller.y = newY;
         });
-
 
         this.scrollContainer.add([
             content,
@@ -217,7 +213,7 @@ export default class InfoScene extends Scene{
 
         // Calculate the scroll percentage (0 to 1)
         const scrollPercent = (dragY - minY) / (maxY - minY);
-        const contentHeight = 2100; // Example content height, adjust as needed 
+        const contentHeight = 3600; // Example content height, adjust as needed 
         const contentMaxY = 160; // The top position of content (relative to mask)
         const contentMinY = -(contentHeight - 500); // The bottom position of content relative to mask
 

@@ -69,20 +69,19 @@ public setMusicEnabled(enabled: boolean) {
 public setMasterVolume(volume: number) {
     Globals.masterVolume = Phaser.Math.Clamp(volume, 0, 1);
     Object.entries(Globals.soundResources).forEach(([key, sound]) => {
-        if (key !== 'backgroundMusic') {
+        if (key == 'backgroundMusic') {
             this.applyVolumeToSound(sound);
         }
     });
 }
 
 public setVolume(key: string, volume: number) {
-    const sound = Globals.soundResources[key];
-    if (sound) {
-        sound.userVolume = Phaser.Math.Clamp(volume, 0, 1);
-        console.log("sound in soundmmanager", sound);
-        
-        this.applyVolumeToSound(sound);
-    }
+    Globals.masterVolume = Phaser.Math.Clamp(volume, 0, 1);
+    Object.entries(Globals.soundResources).forEach(([key, sound]) => {
+        if (key !== 'backgroundMusic') {
+            this.applyVolumeToSound(sound);
+        }
+    });
 }
 
 private applyVolumeToSound(sound: Howl & { userVolume?: number }) {
