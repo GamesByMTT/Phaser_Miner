@@ -25,8 +25,8 @@ export default class Disconnection extends Scene{
         this.popupBackground = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width/2, gameConfig.scale.height/2, "messagePopup").setScale(0.8);
         this.pageviewContainer.add(this.popupBackground)
 
-        const disconnectionText = this.add.text( this.popupBackground.x, this.popupBackground.y - 70, "Unable to connect to server", {color: "#000000", fontFamily:"BabasKai", fontSize: '50px', stroke: "#4f3130",
-            strokeThickness: 1.5, align:"center", wordWrap: { width: 550, useAdvancedWrap: true }})
+        const disconnectionText = this.add.text( this.popupBackground.x, this.popupBackground.y - 70, "Unable to connect to server", {color: "#ffffff", fontSize: "90px", fontFamily: 'BabasKai', stroke: "#4f3130",
+            strokeThickness: 1.5, align:"center", wordWrap: { width: 1000, useAdvancedWrap: true }})
         disconnectionText.setOrigin(0.5);
         this.quit = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width/2, gameConfig.scale.height/2 + 100, "disconnectClose").setInteractive().setScale(0.8)
         // this.ButtonText = this.add.text(gameConfig.scale.width/2 - 60, gameConfig.scale.height/2 + 60, "Close", {color: "#000000", fontFamily:"RobotoSlab", fontSize: '65px', stroke: "#4f3130",

@@ -156,7 +156,7 @@ export default class InfoScene extends Scene{
         const specialSymBol1 = this.add.image(350, 1400, "slots9_0").setDepth(2).setOrigin(0.5)
         const specialSymBol2 = this.add.image(350, 1600, "slots10_0").setDepth(2).setOrigin(0.5)
         const specialSymBol3 = this.add.image(350, 1800, "slots11_0").setDepth(2).setOrigin(0.5)
-       const payLineHead = this.add.text(gameConfig.scale.width / 2, 1950, "PAYTABLE", headingTextStyle)
+       const payLineHead = this.add.text(gameConfig.scale.width / 2, 1950, "PAYTABLE", headingTextStyle).setOrigin(0.5)
       
         const descriptionPos = [ 
             {x: 450, y: 1350},

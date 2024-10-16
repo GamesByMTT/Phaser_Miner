@@ -4,7 +4,7 @@ import { gameConfig } from "./appconfig";
 import { UiContainer } from "./UiContainer";
 import SoundManager from "./SoundManager";
 import InfoScene from "./infoPopup";
-const TextStyle =  {color:"#db5b01", fontSize: "50px", fontFamily: 'BabasKai', align:"center"}
+const TextStyle =  {color:"#ffffff", fontSize: "90px", fontFamily: 'BabasKai', align:"center"}
 
 export class UiPopups extends Phaser.GameObjects.Container {
     SoundManager: SoundManager;
@@ -159,19 +159,19 @@ export class UiPopups extends Phaser.GameObjects.Container {
          // Create scrollbar container
         const popupBg = this.scene.add.image(0, 0, 'messagePopup').setDepth(13);
         const settingText = this.scene.add.text(0, -240, 'SETTINGS', {color: "#fbe300", fontSize: "100px", fontFamily: 'BabasKai'}).setOrigin(0.5);
-        const soundsImage = this.scene.add.image(-300, -100, 'soundImage').setDepth(10).setScale(0.7);
-        const musicImage = this.scene.add.image(-300, 100, 'musicImage').setDepth(10).setScale(0.7);
+        const soundsImage = this.scene.add.image(-300, -50, 'soundImage').setDepth(10).setScale(0.7);
+        const musicImage = this.scene.add.image(-300, 150, 'musicImage').setDepth(10).setScale(0.7);
        
-        const soundScrollbarContainer = this.scene.add.container(200, -100);
-        const musicScrollbarContainer = this.scene.add.container(200, 100);
+        const soundScrollbarContainer = this.scene.add.container(200, -50);
+        const musicScrollbarContainer = this.scene.add.container(200, 150);
 
-            // Create scrollbar backgrounds
-            const soundScrollBar = this.scene.add.image(0, 0, 'sounProgress').setOrigin(0, 0.5);
-            const musicScrollBar = this.scene.add.image(0, 0, 'sounProgress').setOrigin(0, 0.5);
+        // Create scrollbar backgrounds
+        const soundScrollBar = this.scene.add.image(0, 0, 'sounProgress').setOrigin(0, 0.5);
+        const musicScrollBar = this.scene.add.image(0, 0, 'sounProgress').setOrigin(0, 0.5);
 
             // Create handles
-            const soundHandle = this.scene.add.image(0, 0, 'indicatorSpritenew').setOrigin(0.5, 0.5);
-            const musicHandle = this.scene.add.image(0, 0, 'indicatorSpritenew').setOrigin(0.5, 0.5);
+        const soundHandle = this.scene.add.image(0, 0, 'indicatorSpritenew').setOrigin(0.5, 0.5);
+        const musicHandle = this.scene.add.image(0, 0, 'indicatorSpritenew').setOrigin(0.5, 0.5);
 
             // Add backgrounds and handles to containers
             soundScrollbarContainer.add([soundScrollBar, soundHandle]);
@@ -240,8 +240,8 @@ export class UiPopups extends Phaser.GameObjects.Container {
                 updateLevel(localX, musicHandle, musicScrollBar, false);
             });
 
-            soundScrollbarContainer.setPosition(-140, -100);
-            musicScrollbarContainer.setPosition(-140, 100);
+            soundScrollbarContainer.setPosition(-140, -50);
+            musicScrollbarContainer.setPosition(-140, 150);
 
         const exitButtonSprites = [
             this.scene.textures.get('exitButton'),
@@ -299,13 +299,11 @@ export class UiPopups extends Phaser.GameObjects.Container {
         // Popup background image
         const popupBg = this.scene.add.image(0, 0, 'messagePopup').setDepth(10);
         popupBg.setOrigin(0.5);
-        popupBg.setDisplaySize(900, 671); // Set the size for your popup background
+        // popupBg.setDisplaySize(900, 671); // Set the size for your popup background
         popupBg.setAlpha(1); // Set background transparency
         this.exitBtn.disableInteractive();
-
-        const quitHeading = this.scene.add.text(-130, -150, "QUIT GAME", TextStyle)
         // Add text to the popup
-        const popupText = this.scene.add.text(-200, -50, "DO YOU REALLY WANT \n TO QUIT?", {color:"#935a49", fontSize: "40px", fontFamily: 'BabasKai', align:"center" });
+        const popupText = this.scene.add.text(0, -100, "DO YOU REALLY WANT TO QUIT?", TextStyle).setOrigin(0.5);
         
         // Yes and No buttons
         const logoutButtonSprite = [
@@ -330,11 +328,11 @@ export class UiPopups extends Phaser.GameObjects.Container {
             popupContainer.destroy();
             blurGraphic.destroy(); // Destroy blurGraphic when popup is closed
         }, 0, true);
-        this.yesBtn.setPosition(-130, 150).setScale(0.8, 0.8);
-        this.noBtn.setPosition(130, 150).setScale(0.8, 0.8);
+        this.yesBtn.setPosition(-200, 150).setScale(0.8, 0.8);
+        this.noBtn.setPosition(200, 150).setScale(0.8, 0.8);
        
         // Add all elements to popupContainer
-        popupContainer.add([popupBg, popupText, quitHeading, this.yesBtn, this.noBtn]);
+        popupContainer.add([popupBg, popupText, this.yesBtn, this.noBtn]);
         // Add popupContainer to the scene
         this.scene.add.existing(popupContainer);       
     }
