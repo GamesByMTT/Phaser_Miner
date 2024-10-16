@@ -25,6 +25,16 @@ export default class MainScene extends Scene {
     uiPopups!: UiPopups;    
     // lineSymbols!: LineSymbols;
     private mainContainer!: Phaser.GameObjects.Container;
+    private inputOverLay!: Phaser.GameObjects.Shape
+
+    private freeSpinElements: {
+        freeText: Phaser.GameObjects.Text;
+        filledBar: Phaser.GameObjects.Sprite;
+        maskGraphics: Phaser.GameObjects.Graphics;
+        initialCount: number;
+        maxFreeSpins: number;
+        currentCount: number;
+    } | null = null;
 
     constructor() {
         super({ key: 'MainScene' });
@@ -99,19 +109,12 @@ export default class MainScene extends Scene {
         let winAmount = ResultData.gameData.WinAmout;
         let jackpot = ResultData.gameData.jackpot;
         const freeSpinCount = ResultData.gameData.freeSpins.count;
+        // const freeSpinCount = 5;
+        const maxFreeSpins = 5
                 // Check if freeSpinCount is greater than 1
         if (freeSpinCount >=1) {
-                this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
+                this.freeSpinPopup(freeSpinCount, maxFreeSpins, 'freeSpinEmptyBar')
                 this.uiContainer.freeSpininit(freeSpinCount)
-                // this.tweens.add({
-                //     targets: this.uiContainer.freeSpinText,
-                //     scaleX: 1.3, 
-                //     scaleY: 1.3, 
-                //     duration: 800, // Duration of the scale effect
-                //     yoyo: true, 
-                //     repeat: -1, 
-                //     ease: 'Sine.easeInOut' // Easing function
-                // });
         } else {
             this.uiContainer.freeSpininit(freeSpinCount)
         }
@@ -130,37 +133,151 @@ export default class MainScene extends Scene {
               this.showWinPopup(winAmount, 'jackpotPopup')
            }
     }
-
-    /**
+     /**
      * @method freeSpinPopup
      * @description Displays a popup showing the win amount with an increment animation and different sprites
      * @param freeSpinCount The amount won to display in the popup
      * @param spriteKey The key of the sprite to display in the popup
      */
-    freeSpinPopup(freeSpinCount: number, spriteKey: string) {
-        
+    freeSpinPopup(freeSpinCount: number, maxFreeSpins: number, spriteKey: string) {
         // Create the popup background
-        const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x2a1820, 0.95)
-        .setOrigin(0, 0)
-        .setDepth(9) // Set depth to be below the popup but above game elements
-        .setInteractive() // Make it interactive to block all input events
-        inputOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            // Prevent default action on pointerdown to block interaction
+        this.inputOverLay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x2a1820, 0)
+            .setOrigin(0, 0)
+            .setDepth(9)
+            .setInteractive();
+        this.inputOverLay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             pointer.event.stopPropagation();
         });
-        // Create the sprite based on the key provided
-        const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, spriteKey).setDepth(11);
-        if(!this.uiContainer.isAutoSpinning){
-        }
-        // Create the text object to display win amount
-        const freeText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
+    
+        // Create the empty bar sprite
+        const emptyBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinEmptyBar').setDepth(11);
+    
+        // Create the filled bar sprite
+        const filledBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinFilledBar').setDepth(12);
+    
+        // Create a mask for the filled bar
+        const maskGraphics = this.make.graphics();
+        maskGraphics.fillStyle(0xffffff);
+        maskGraphics.fillRect(filledBar.x - filledBar.width / 2, filledBar.y - filledBar.height / 2, filledBar.width, filledBar.height);
+    
+        const mask = maskGraphics.createGeometryMask();
+        filledBar.setMask(mask);
+    
+        // Update the mask based on freeSpinCount
+        this.updateFillBar(freeSpinCount, maxFreeSpins, filledBar, maskGraphics);
+    
+        // Create the text object to display free spin count
+        const freeText = this.add.text(this.cameras.main.width * 0.1, this.cameras.main.height * 0.23, freeSpinCount.toString(), {
             font: '55px',
-            color: '#000000'
-        }).setDepth(11).setOrigin(0.5);
-        // Tween to animate the text increment from 0 to winAmount
+            color: '#ffffff'
+        }).setDepth(13).setOrigin(0.5);
+    
+        // Store references to objects that need updating
+        this.freeSpinElements = {
+            freeText,
+            filledBar,
+            maskGraphics,
+            initialCount: freeSpinCount,
+            maxFreeSpins,
+            currentCount: freeSpinCount
+        };
+    
+        // Start the free spin sequence
+        this.startFreeSpinSequence();
+    }
+    
+    
+
+    updateFreeSpinCount(newCount: number) {
+        if (this.freeSpinElements) {
+            this.freeSpinElements.freeText.setText(newCount.toString());
+            this.updateFillBar(newCount, this.freeSpinElements.maxFreeSpins, this.freeSpinElements.filledBar, this.freeSpinElements.maskGraphics);
+        }
     }
 
-    // Function to show win popup
+    startFreeSpinSequence() {
+        if (this.freeSpinElements) {
+            // Show the initial filled bar
+            this.updateFillBar(this.freeSpinElements.currentCount, this.freeSpinElements.maxFreeSpins, this.freeSpinElements.filledBar, this.freeSpinElements.maskGraphics);
+    
+            // Set a timeout before starting the spins (e.g., 7 seconds)
+            this.time.delayedCall(7000, () => {
+                this.startFreeSpins(this.freeSpinElements!.currentCount);
+            });
+        }
+    }
+    
+    startFreeSpins(freeSpinCount: number) {
+        this.uiContainer.startFreeSpins(freeSpinCount, () => {
+            // This is your spinCallback
+            this.processFreeSpins();
+        });
+    }
+
+    processFreeSpins() {
+        if (this.freeSpinElements && this.freeSpinElements.currentCount > 0) {
+            // Perform the spin (you'll need to implement this based on your game logic)
+            // this.performSpin();
+            
+            // Reduce the free spin count
+            this.freeSpinElements.currentCount--;
+    
+            // Update the text
+            this.freeSpinElements.freeText.setText(this.freeSpinElements.currentCount.toString());
+    
+            // Store references to needed properties to avoid null checks in the tween
+            const { maskGraphics, filledBar, currentCount, maxFreeSpins } = this.freeSpinElements;
+    
+            this.tweens.add({
+                targets: maskGraphics,
+                fillHeight: {
+                    from: filledBar.height * (currentCount + 1) / maxFreeSpins,
+                    to: filledBar.height * currentCount / maxFreeSpins
+                },
+                duration: 1000,
+                ease: 'Power2',
+                onUpdate: () => {
+                    this.updateFillBar(currentCount, maxFreeSpins, filledBar, maskGraphics);
+                },
+                onComplete: () => {
+                    if (this.freeSpinElements) {  // Check again in case it became null during the tween
+                        if (this.freeSpinElements.currentCount <= 0) {
+                            // Destroy the filled bar sprite
+                            this.freeSpinElements.filledBar.destroy();
+                            this.freeSpinElements.maskGraphics.destroy();
+                        }
+    
+                        // Check if there are more free spins
+                        if (this.freeSpinElements.currentCount > 0) {
+                            // Set a timeout before the next spin (e.g., 1 second)
+                            this.time.delayedCall(7000, () => {
+                                this.processFreeSpins();
+                            });
+                        } else {
+                            // Free spins are finished
+                            console.log("Free spins finished");
+                            // Implement any logic for when free spins are done
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    updateFillBar(currentCount: number, maxCount: number, filledBar: Phaser.GameObjects.Sprite, maskGraphics: Phaser.GameObjects.Graphics) {
+        const fillPercentage = Math.min(currentCount / maxCount, 1);
+        const fillHeight = filledBar.height * fillPercentage;
+        maskGraphics.clear();
+        maskGraphics.fillStyle(0xffffff);
+        // Calculate the y position for the bottom of the fill
+        const fillBottom = filledBar.y + filledBar.height / 2;
+        maskGraphics.fillRect(
+            filledBar.x / 1.255,  // Left edge
+            fillBottom - fillHeight,            // Top edge (moving upwards)
+            filledBar.width,                    // Width of the fill
+            fillHeight                          // Height of the fill
+        );
+    }
     private showWinPopup(winAmount: number, spriteKey: string) {
         const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.7)
             .setOrigin(0, 0)
@@ -207,5 +324,4 @@ export default class MainScene extends Scene {
             });
 
     }
-
-}
+} 

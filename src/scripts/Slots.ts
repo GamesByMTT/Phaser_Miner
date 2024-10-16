@@ -118,7 +118,7 @@ export class Slots extends Phaser.GameObjects.Container {
             for (let j = 0; j < this.reelContainers[i].list.length; j++) {
                 setTimeout(() => {
                     this.slotSymbols[i][j].startMoving = true;
-                    if (j < 3) this.slotSymbols[i][j].stopAnimation();
+                    if (j < 4) this.slotSymbols[i][j].stopAnimation();
                 }, 100 * i);
             }
         }
