@@ -95,7 +95,6 @@ public getSound(key: string): Phaser.Sound.BaseSound | undefined {
 }
 private setupFocusBlurEvents() {
     window.addEventListener('blur', () => {
-            // console.log("onBlur");
                 this.pauseSound('backgroundMusic');
         });
 

@@ -23,9 +23,11 @@ export default class MainScene extends Scene {
     soundManager!: SoundManager;
     uiContainer!: UiContainer;
     uiPopups!: UiPopups;    
+    emptyBar!: Phaser.GameObjects.Sprite;
     // lineSymbols!: LineSymbols;
     private mainContainer!: Phaser.GameObjects.Container;
     private inputOverLay!: Phaser.GameObjects.Shape
+    private inputContainer!: Phaser.GameObjects.Container
 
     private freeSpinElements: {
         freeText: Phaser.GameObjects.Text;
@@ -47,7 +49,6 @@ export default class MainScene extends Scene {
         this.mainContainer = this.add.container();
 
         this.soundManager = new SoundManager(this);
-        console.log("MainScene Loaded on Miner");
 
         this.gameBg = this.add.sprite(width / 2, height / 2, 'gameBg')
             .setDepth(0)
@@ -114,7 +115,7 @@ export default class MainScene extends Scene {
                 // Check if freeSpinCount is greater than 1
         if (freeSpinCount >=1) {
                 this.freeSpinPopup(freeSpinCount, maxFreeSpins, 'freeSpinEmptyBar')
-                this.uiContainer.freeSpininit(freeSpinCount)
+                // this.uiContainer.freeSpininit(freeSpinCount)
         } else {
             this.uiContainer.freeSpininit(freeSpinCount)
         }
@@ -141,25 +142,40 @@ export default class MainScene extends Scene {
      */
     freeSpinPopup(freeSpinCount: number, maxFreeSpins: number, spriteKey: string) {
         // Create the popup background
-        this.inputOverLay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x2a1820, 0)
-            .setOrigin(0, 0)
-            .setDepth(9)
-            .setInteractive();
-        this.inputOverLay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            pointer.event.stopPropagation();
-        });
+        if (!this.inputOverLay) {
+            this.inputOverLay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x2a1820, 0)
+                .setOrigin(0, 0)
+                .setDepth(9)
+                .setInteractive();
+            this.inputOverLay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                pointer.event.stopPropagation();
+            });
+        }
     
-        // Create the empty bar sprite
-        const emptyBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinEmptyBar').setDepth(11);
-    
+        // Create or update the empty bar sprite
+        if (!this.emptyBar) {
+            this.emptyBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinEmptyBar').setDepth(11);
+        }
         // Create the filled bar sprite
-        const filledBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinFilledBar').setDepth(12);
-    
-        // Create a mask for the filled bar
-        const maskGraphics = this.make.graphics();
+        // Create or update the filled bar sprite
+        let filledBar: Phaser.GameObjects.Sprite;
+        if (this.freeSpinElements && this.freeSpinElements.filledBar) {
+            filledBar = this.freeSpinElements.filledBar;
+        } else {
+            filledBar = this.add.sprite(this.cameras.main.width * 0.1, this.cameras.main.centerY, 'freeSpinFilledBar').setDepth(12);
+        }
+
+        // Create or update the mask for the filled bar
+        let maskGraphics: Phaser.GameObjects.Graphics;
+        if (this.freeSpinElements && this.freeSpinElements.maskGraphics) {
+            maskGraphics = this.freeSpinElements.maskGraphics;
+        } else {
+            maskGraphics = this.make.graphics();
+        }
+        maskGraphics.clear();
         maskGraphics.fillStyle(0xffffff);
         maskGraphics.fillRect(filledBar.x - filledBar.width / 2, filledBar.y - filledBar.height / 2, filledBar.width, filledBar.height);
-    
+
         const mask = maskGraphics.createGeometryMask();
         filledBar.setMask(mask);
     
@@ -167,11 +183,16 @@ export default class MainScene extends Scene {
         this.updateFillBar(freeSpinCount, maxFreeSpins, filledBar, maskGraphics);
     
         // Create the text object to display free spin count
-        const freeText = this.add.text(this.cameras.main.width * 0.1, this.cameras.main.height * 0.23, freeSpinCount.toString(), {
-            font: '55px',
-            color: '#ffffff'
-        }).setDepth(13).setOrigin(0.5);
-    
+        let freeText: Phaser.GameObjects.Text;
+        if (this.freeSpinElements && this.freeSpinElements.freeText) {
+            freeText = this.freeSpinElements.freeText;
+            freeText.setText(freeSpinCount.toString());
+        } else {
+            freeText = this.add.text(this.cameras.main.width * 0.1, this.cameras.main.height * 0.23, freeSpinCount.toString(), {
+                font: '55px',
+                color: '#ffffff'
+            }).setDepth(13).setOrigin(0.5);
+        }    
         // Store references to objects that need updating
         this.freeSpinElements = {
             freeText,
@@ -181,25 +202,13 @@ export default class MainScene extends Scene {
             maxFreeSpins,
             currentCount: freeSpinCount
         };
-    
         // Start the free spin sequence
         this.startFreeSpinSequence();
     }
-    
-    
-
-    updateFreeSpinCount(newCount: number) {
-        if (this.freeSpinElements) {
-            this.freeSpinElements.freeText.setText(newCount.toString());
-            this.updateFillBar(newCount, this.freeSpinElements.maxFreeSpins, this.freeSpinElements.filledBar, this.freeSpinElements.maskGraphics);
-        }
-    }
 
     startFreeSpinSequence() {
-        if (this.freeSpinElements) {
-            // Show the initial filled bar
-            this.updateFillBar(this.freeSpinElements.currentCount, this.freeSpinElements.maxFreeSpins, this.freeSpinElements.filledBar, this.freeSpinElements.maskGraphics);
-    
+    if (this.freeSpinElements) {                                                                                                                         
+            this.updateFillBar(this.freeSpinElements.currentCount, this.freeSpinElements.initialCount, this.freeSpinElements.filledBar, this.freeSpinElements.maskGraphics);
             // Set a timeout before starting the spins (e.g., 7 seconds)
             this.time.delayedCall(7000, () => {
                 this.startFreeSpins(this.freeSpinElements!.currentCount);
@@ -208,23 +217,18 @@ export default class MainScene extends Scene {
     }
     
     startFreeSpins(freeSpinCount: number) {
-        this.uiContainer.startFreeSpins(freeSpinCount, () => {
-            // This is your spinCallback
-            this.processFreeSpins();
-        });
+            this.uiContainer.callFreeSpin(freeSpinCount, () => {
+                this.processFreeSpins();
+                this.soundManager.playSound("onSpin");
+                this.slot.moveReel();
+                this.lineGenerator.hideLines();
+            });
     }
 
     processFreeSpins() {
         if (this.freeSpinElements && this.freeSpinElements.currentCount > 0) {
-            // Perform the spin (you'll need to implement this based on your game logic)
-            // this.performSpin();
-            
-            // Reduce the free spin count
             this.freeSpinElements.currentCount--;
-    
-            // Update the text
-            this.freeSpinElements.freeText.setText(this.freeSpinElements.currentCount.toString());
-    
+            // this.freeSpinElements.freeText.setText(this.freeSpinElements.currentCount.toString());
             // Store references to needed properties to avoid null checks in the tween
             const { maskGraphics, filledBar, currentCount, maxFreeSpins } = this.freeSpinElements;
     
@@ -240,23 +244,36 @@ export default class MainScene extends Scene {
                     this.updateFillBar(currentCount, maxFreeSpins, filledBar, maskGraphics);
                 },
                 onComplete: () => {
-                    if (this.freeSpinElements) {  // Check again in case it became null during the tween
-                        if (this.freeSpinElements.currentCount <= 0) {
-                            // Destroy the filled bar sprite
-                            this.freeSpinElements.filledBar.destroy();
-                            this.freeSpinElements.maskGraphics.destroy();
-                        }
-    
-                        // Check if there are more free spins
+                    if (this.freeSpinElements) { 
                         if (this.freeSpinElements.currentCount > 0) {
-                            // Set a timeout before the next spin (e.g., 1 second)
-                            this.time.delayedCall(7000, () => {
-                                this.processFreeSpins();
-                            });
+                            // this.time.delayedCall(7000, () => {
+                            //     this.processFreeSpins();
+                            // });
                         } else {
-                            // Free spins are finished
-                            console.log("Free spins finished");
-                            // Implement any logic for when free spins are done
+                            if (this.inputOverLay) {
+                                this.inputOverLay.destroy();
+                            }
+    
+                            // Destroy filledBar
+                            if (this.freeSpinElements.filledBar) {
+                                this.freeSpinElements.filledBar.destroy();
+                            }
+    
+                            // Destroy maskGraphics
+                            if (this.freeSpinElements.maskGraphics) {
+                                this.freeSpinElements.maskGraphics.destroy();
+                            }
+    
+                            // Destroy emptyBar
+                            if (this.emptyBar) {
+                                this.emptyBar.destroy();
+                            }
+    
+                            // Destroy freeText
+                            if (this.freeSpinElements.freeText) {
+                                this.freeSpinElements.freeText.destroy();
+                            }
+    
                         }
                     }
                 }

@@ -299,55 +299,62 @@ export class UiContainer extends Phaser.GameObjects.Container {
         ).setDepth(0).setScale(0.9);
     }
 
-    startFreeSpins(freeSpinCount: number, spinCallback: () => void) {
-        this.freeSpinsRemaining = freeSpinCount;
-        this.isFreeSpinning = true;
-        this.isAutoSpinning = true; // Use the existing auto-spin state
-    
-        // Store the original spinCallback
-        const originalSpinCallback = spinCallback;
-    
-        // Create a new spinCallback that handles free spins
-        const freeSpinCallback = () => {
-            if (this.freeSpinsRemaining > 0) {
-                this.freeSpinsRemaining--;
-                
-                Globals.Socket?.sendMessage("SPIN", {
-                    currentBet: currentGameData.currentBetIndex,
-                    currentLines: initData.gameData.Lines.length,
-                    isFreeSpins: true
-                });
-    
-                originalSpinCallback(); // Call the original spin callback
-    
-                // Update UI to show remaining free spins
-                this.updateFreeSpinDisplay(this.freeSpinsRemaining);
-    
-                // If there are more free spins, continue the process
-                if (this.freeSpinsRemaining > 0) {
-                    this.scene.time.delayedCall(3000, () => { // Adjust timing as needed
-                        this.autoBetBtn.emit('pointerdown');
+    freeAutoSpinBtnInit(freeSpinCount: number, spinCallBack: () => void) {
+        console.error("checek", freeSpinCount);
+        if(freeSpinCount <= 0){
+            this.isAutoSpinning = true;
+        }
+        const button = this.scene.add.sprite(gameConfig.scale.width * 0.74, gameConfig.scale.height * 0.9, 'autoSpin').setInteractive({ useHandCursor: true, pixelPerfect: true });
+        console.error("button", button);
+        const handleButtonClick = () => {
+            this.normalButtonSound = this.scene.sound.add("buttonpressed", {
+                loop: false,
+                volume: 0.8
+            })
+            this.normalButtonSound.play()
+            this.scene.tweens.add({
+                targets: this.autoBetBtn,
+                scaleX: 1,
+                scaleY: 1,
+                duration: 100,
+                onComplete: () =>{
+                    this.isAutoSpinning = !this.isAutoSpinning; // Toggle auto-spin state
+                    if (this.isAutoSpinning && currentGameData.currentBalance > 0) {
+                        Globals.Socket?.sendMessage("SPIN", {
+                            currentBet: currentGameData.currentBetIndex,
+                            currentLines : initData.gameData.Lines.length
+                        });
+                        currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
+                        this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
+                        this.autoSpinRec(true)
+                        spinCallBack(); // Callback to indicate the spin has started
+                        // Start the spin recursion
+                        this.startSpinRecursion(spinCallBack);
+                    } else {
+                        // Stop the spin if auto-spin is turned off
+                        this.autoSpinRec(false);
+                    }
+                    this.scene.tweens.add({
+                        targets: this.autoBetBtn,
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 100,
+                        onComplete: () => {
+                            // this.spinBtn.setTexture('spinBtn');
+                        }
                     });
-                } else {
-                    this.endFreeSpins();
                 }
-            }
-        };
-    
-        // Call the existing autoSpinBtnInit with the new freeSpinCallback
-        this.autoSpinBtnInit(freeSpinCallback);
-    
-        // Trigger the first free spin
-        this.autoBetBtn.emit('pointerdown');
+            })
+        }
+        button.on('pointerdown', handleButtonClick);
+        return handleButtonClick;
     }
 
-    updateFreeSpinDisplay(remainingSpins: number) {
-        // Update your UI to show the remaining free spins
-        // For example:
-        if (this.freeSpinText) {
-            this.freeSpinText.setText(remainingSpins.toString());
-        }
+    callFreeSpin(freeSpinCount: number, spinCallBack: () => void){
+        const triggerAutoSpin = this.freeAutoSpinBtnInit(freeSpinCount, spinCallBack);
+        triggerAutoSpin();
     }
+
     
     endFreeSpins() {
         this.isFreeSpinning = false;

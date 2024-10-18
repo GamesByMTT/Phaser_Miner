@@ -57,7 +57,7 @@ export class Slots extends Phaser.GameObjects.Container {
             y: gameConfig.scale.height / 4.2    
         };
         const totalSymbol = 12;
-        const visibleSymbol = 3;
+        const visibleSymbol = 4;
         const startIndex = 1;
         const initialYOffset = (totalSymbol - startIndex - visibleSymbol) * this.spacingY;
         const totalSymbolsPerReel = 24; 
@@ -179,16 +179,16 @@ export class Slots extends Phaser.GameObjects.Container {
         this.scene.tweens.add({
             targets: reel,
             y: targetY, // Animate relative to the current position
-            duration: 600,
+            duration: 900,
             // ease: 'Elastic.easeOut',
             ease: 'Cubic.easeOut',
             onComplete: () => {
-                if (this.reelTweens[reelIndex]) {
-                    this.reelTweens[reelIndex].stop(); 
-                }
                 if (reelIndex === this.reelContainers.length - 1) {
                     this.playWinAnimations();
                     this.moveSlots = false;
+                }
+                if (this.reelTweens[reelIndex]) {
+                    this.reelTweens[reelIndex].stop(); 
                 }
             },
             delay: reelDelay
@@ -232,7 +232,7 @@ class Symbols {
     startMoving: boolean = false;
     index: { x: number; y: number };
     totalSymbol : number = 12;
-    visibleSymbol: number = 3;
+    visibleSymbol: number = 4;
     startIndex: number = 1;
     spacingY : number = 204;
     scene: Phaser.Scene;
@@ -300,7 +300,7 @@ class Symbols {
         }
     }
     endTween() {
-        if (this.index.y < 3) {
+        if (this.index.y < 4) {
             let textureKeys: string[] = [];
             // Retrieve the elementId based on index
             const elementId = ResultData.gameData.ResultReel[this.index.y][this.index.x];
